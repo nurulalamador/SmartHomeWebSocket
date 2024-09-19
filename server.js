@@ -30,6 +30,7 @@ wss.on('connection', (ws) => {
         if (Buffer.isBuffer(message)) {
             message = message.toString();
         }
+        console.log(message);
         let data = message.split(":");
         if(data[0] == "toggle") {
             controls[data[1]] = controls[data[1]] == 1 ? 0 : 1;
