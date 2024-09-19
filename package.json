@@ -1,11 +1,16 @@
 {
   "script": {
-    "start": "nodemon server.js"
+    "start": "node server.js"
   },
   "dependencies": {
     "ejs": "^3.1.10",
     "express": "^4.21.0",
     "nodemon": "^3.1.4",
     "ws": "^8.18.0"
+  },
+  "deploy": {
+      "startCommand": "node server.js",
+      "restartPolicyType": "ON_FAILURE",
+      "restartPolicyMaxRetries": 10
   }
 }
