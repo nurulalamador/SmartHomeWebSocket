@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Home Voice Control</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 30px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .devices-container {
+            display: flex;
+            gap: 25px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+
+        .device {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .device:hover {
+            transform: translateY(-5px);
+        }
+
+        .device-button {
+            width: 85px;
+            height: 85px;
+            border-radius: 50%;
+            border: 3px solid rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .device-button::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.1));
+            z-index: -1;
+        }
+
+        .device-button.on {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            box-shadow: 0 0 20px rgba(56, 239, 125, 0.6);
+        }
+
+        .device-button.off {
+            background: linear-gradient(135deg, #ed213a 0%, #93291e 100%);
+            box-shadow: 0 0 20px rgba(237, 33, 58, 0.4);
+        }
+
+        .device-button .material-icons {
+            font-size: 45px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .device-name {
+            color: white;
+            font-weight: 600;
+            margin-top: 10px;
+            font-size: 0.95rem;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .device-status {
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-top: 3px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .device-status.on {
+            color: #4ade80;
+        }
+
+        .device-status.off {
+            color: #fca5a5;
+        }
+
+        .voice-control {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .mic-button {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .mic-button::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.2));
+            z-index: -1;
+        }
+
+        .mic-button:hover {
+            transform: scale(1.05);
+        }
+
+        .mic-button.listening {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            animation: pulse 1.5s ease-in-out infinite;
+            box-shadow: 0 0 30px rgba(255, 107, 107, 0.8);
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 30px rgba(255, 107, 107, 0.8);
+            }
+
+            50% {
+                transform: scale(1.08);
+                box-shadow: 0 0 40px rgba(255, 107, 107, 1);
+            }
+        }
+
+        .mic-button .material-icons {
+            font-size: 55px;
+            color: #4b5563;
+        }
+
+        .mic-button.listening .material-icons {
+            color: white;
+        }
+
+        .tap-text {
+            color: white;
+            font-weight: 600;
+            margin-top: 12px;
+            font-size: 1.1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .feedback-container {
+            text-align: center;
+            min-height: 60px;
+            margin-bottom: 20px;
+        }
+
+        .transcript {
+            color: #ddd6fe;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .feedback {
+            color: #fef08a;
+            font-size: 1rem;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            padding: 18px 24px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 450px;
+            color: white;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .instructions h2 {
+            color: white;
+            margin-bottom: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Smart Home Control</h1>
+
+        <div class="devices-container">
+            <!-- Fan -->
+            <div class="device" onclick="toggleServer('fan')">
+                <div class="device-button off" id="fan-button">
+                    <span class="material-icons">air</span>
+                </div>
+                <div class="device-name">Fan</div>
+                <div class="device-status off" id="fan-status">Off</div>
+            </div>
+
+            <!-- Light -->
+            <div class="device" onclick="toggleServer('light')">
+                <div class="device-button off" id="light-button">
+                    <span class="material-icons">lightbulb</span>
+                </div>
+                <div class="device-name">Light</div>
+                <div class="device-status off" id="light-status">Off</div>
+            </div>
+
+            <!-- Door -->
+            <div class="device" onclick="toggleServer('door')">
+                <div class="device-button off" id="door-button">
+                    <span class="material-icons">door_back</span>
+                </div>
+                <div class="device-name">Door</div>
+                <div class="device-status off" id="door-status">Off</div>
+            </div>
+        </div>
+
+        <div class="voice-control">
+            <div class="mic-button" id="mic-button" onclick="toggleListening()">
+                <span class="material-icons">mic</span>
+            </div>
+            <div class="tap-text">Tap To Speak</div>
+        </div>
+
+        <div class="feedback-container">
+            <div class="transcript" id="transcript"></div>
+            <div class="feedback" id="feedback"></div>
+        </div>
+
+        <div class="instructions">
+            <h2>Voice Command Hints</h2>
+            Give commands like "Turn on Fan", "Turn off Light", "Open Door", "Close Door", and etc.</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        var socket = new WebSocket('ws://192.168.10.100:3000');
+
+        const devices = {
+            fan: true,
+            light: true,
+            door: false
+        };
+
+        let recognition = null;
+        let isListening = false;
+
+
+        socket.onopen = function (event) {
+            console.log('Connected to the server.');
+        };
+
+        socket.onmessage = function (event) {
+            console.log(event.data);
+            let data = event.data.split(":");
+
+            if (data[0] == "control") {
+                if (data[2] == "1") {
+                    devices[data[1]] = true;
+                }
+                else {
+                    devices[data[1]] = false;
+                }
+
+                updateDeviceUI(data[1]);
+            }
+        };
+
+        function toggleServer(option) {
+            socket.send("toggle:" + option);
+        };
+
+
+
+        // Initialize speech recognition
+        function initSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+            if (SpeechRecognition) {
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+
+                recognition.onresult = (event) => {
+                    const command = event.results[0][0].transcript.toLowerCase();
+                    document.getElementById('transcript').textContent = `You said: "${command}"`;
+                    processCommand(command);
+                };
+
+                recognition.onerror = (event) => {
+                    console.error('Speech recognition error:', event.error);
+                    isListening = false;
+                    updateMicButton();
+                    document.getElementById('feedback').textContent = 'Error: Could not recognize speech';
+                };
+
+                recognition.onend = () => {
+                    isListening = false;
+                    updateMicButton();
+                };
+            } else {
+                alert('Speech recognition is not supported in this browser. Please use Chrome or Edge.');
+            }
+        }
+
+        // Toggle listening
+        function toggleListening() {
+            if (!recognition) {
+                initSpeechRecognition();
+            }
+
+            if (isListening) {
+                recognition.stop();
+                isListening = false;
+            } else {
+                document.getElementById('transcript').textContent = '';
+                document.getElementById('feedback').textContent = 'Listening...';
+                recognition.start();
+                isListening = true;
+            }
+            updateMicButton();
+        }
+
+        // Update microphone button appearance
+        function updateMicButton() {
+            const micButton = document.getElementById('mic-button');
+            if (isListening) {
+                micButton.classList.add('listening');
+            } else {
+                micButton.classList.remove('listening');
+            }
+        }
+
+        // Process voice command
+        function processCommand(command) {
+            let deviceChanged = null;
+            let action = null;
+
+            // Fan commands
+            if (command.includes('fan')) {
+                deviceChanged = 'fan';
+                if (command.includes('turn on') || (command.includes('on') && !command.includes('off'))) {
+                    action = 'on';
+                    devices.fan = true;
+                } else if (command.includes('turn off') || command.includes('off')) {
+                    action = 'off';
+                    devices.fan = false;
+                } else if (command.includes('toggle')) {
+                    devices.fan = !devices.fan;
+                    action = devices.fan ? 'on' : 'off';
+                }
+            }
+            // Light commands
+            else if (command.includes('light')) {
+                deviceChanged = 'light';
+                if (command.includes('turn on') || (command.includes('on') && !command.includes('off'))) {
+                    action = 'on';
+                    devices.light = true;
+                } else if (command.includes('turn off') || command.includes('off')) {
+                    action = 'off';
+                    devices.light = false;
+                } else if (command.includes('toggle')) {
+                    devices.light = !devices.light;
+                    action = devices.light ? 'on' : 'off';
+                }
+            }
+            // Door commands
+            else if (command.includes('door')) {
+                deviceChanged = 'door';
+                if (command.includes('open') || command.includes('turn on') || (command.includes('on') && !command.includes('off'))) {
+                    action = 'on';
+                    devices.door = true;
+                } else if (command.includes('close') || command.includes('turn off') || command.includes('off')) {
+                    action = 'off';
+                    devices.door = false;
+                } else if (command.includes('toggle')) {
+                    devices.door = !devices.door;
+                    action = devices.door ? 'on' : 'off';
+                }
+            }
+
+            // Update UI and provide feedback
+            if (deviceChanged && action) {
+                // updateDeviceUI(deviceChanged);
+                toggleServer(deviceChanged);
+                console.log(`Toggled ${deviceChanged} ${action} via voice command.`);
+                const deviceName = deviceChanged === 'fan' ? 'Fan' :
+                    deviceChanged === 'light' ? 'Light' : 'Door';
+                const message = `${deviceName} turned ${action}`;
+                document.getElementById('feedback').textContent = message;
+                speak(message);
+            } else {
+                const message = 'Command not recognized';
+                document.getElementById('feedback').textContent = message;
+                speak(message);
+            }
+        }
+
+        // Text to speech
+        function speak(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 1;
+            utterance.pitch = 1;
+            window.speechSynthesis.speak(utterance);
+        }
+
+
+        // Update device UI
+        function updateDeviceUI(device) {
+            const button = document.getElementById(`${device}-button`);
+            const status = document.getElementById(`${device}-status`);
+
+            if (devices[device]) {
+                button.classList.remove('off');
+                button.classList.add('on');
+                status.classList.remove('off');
+                status.classList.add('on');
+                status.textContent = 'On';
+            } else {
+                button.classList.remove('on');
+                button.classList.add('off');
+                status.classList.remove('on');
+                status.classList.add('off');
+                status.textContent = 'Off';
+            }
+        }
+
+        // Initialize speech recognition on page load
+        window.onload = () => {
+            initSpeechRecognition();
+        };
+    </script>
+</body>
+
+</html>
